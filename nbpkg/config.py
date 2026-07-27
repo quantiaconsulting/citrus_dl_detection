@@ -7,7 +7,7 @@ from pathlib import Path
 class Config:
     # ---- paths (EDIT) -------------------------------------------------------
     # Parent folder that contains Day4/ Day5/ Day7/ Day10/, each with scan folders.
-    data_root: Path = Path("data")
+    data_root: Path = Path("Processed_Im_citrus_data")
     # Optional: parent of a curated copy (same Day*/scan layout) with cleaned
     # slices for TRAINING only. Leave as None to train on all slices.
     curated_root: Path | None = None

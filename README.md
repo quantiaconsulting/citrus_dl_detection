@@ -82,3 +82,34 @@ entirely); noted in `slice_curation.py`.
 00/01/02a/03 were executed end-to-end against a reconstruction of your real tree
 (189 scans -> 189 fruit -> 105/27/57 split; curation produced a manifest + curated tree;
 Table 3 with CIs). `python nbpkg/selftest_core.py` re-checks the statistics.
+
+
+## Attention-MIL alternative (02b / 03b) — recommended path
+
+The slice-cleaning heuristic (02a) was tested on the real data and **failed**: with a
+control-calibrated damage-score threshold, 46 of 78 infested training fruit had *zero*
+slices above threshold and there was no dose-response gradient — the simple "dark-pixel
+fraction" score does not capture the fine, low-contrast galleries (confirmed: even a
+500-fly day-10 fruit scored like a control, yet the galleries are clearly visible by eye).
+
+So instead of hand/heuristic slice cleaning, use **attention-based Multiple-Instance
+Learning**, which is both more defensible and removes the reviewer's objection about
+subjective curation:
+
+```
+00 -> 01 -> 02b_mil_train -> 03b_mil_eval
+```
+
+* `nbpkg/mil.py` — frozen backbone extracts per-slice features (cached once), a gated
+  attention head (Ilse et al. 2018) learns which slices matter and outputs one
+  probability per fruit. All four backbones.
+* A fruit (bag) is infested iff at least one slice shows infestation; controls have no
+  positive slices. No slice deletion, no arbitrary voting threshold.
+* `03b` evaluates per fruit with 95% CIs (fruits are independent bags), tunes the
+  decision threshold on validation, and plots the **top-attended slices** as evidence
+  the model looks at genuine galleries.
+* The backbone is frozen (feature extractor); if val AUC underfits, fine-tuning the last
+  blocks end-to-end is the documented next step.
+
+02a (slice curation) is kept in the package for completeness but is **not** the
+recommended route given the above.
